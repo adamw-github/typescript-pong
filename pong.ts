@@ -9,6 +9,51 @@ type gameRulesType = {
 const X = 0;
 const Y = 1;
 
+function drawEverything(
+    context: CanvasRenderingContext2D,
+    gameRules: gameRulesType,
+    ballPos: [number, number],
+    paddlePos: [number, number]
+) {
+    // Reset background
+    context.fillStyle = 'black';
+    context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+    // Draw Paddle
+    context.fillStyle = 'white';
+    context.fillRect(paddlePos[X], paddlePos[Y], gameRules.paddleDimensions[0], gameRules.paddleDimensions[1]);
+    // Draw Ball
+    context.beginPath();
+    context.arc(ballPos[X], ballPos[Y], gameRules.ballSize, 0, Math.PI*2, true);
+    context.fill();
+}
+
+function movePaddle(event: string, paddlePos: [number, number], speed: number) {
+if (event === 'ArrowLeft') {
+    return paddlePos[X] - speed;
+} else if (event === 'ArrowRight') {
+    return paddlePos[X] + speed;
+} else return paddlePos[X];
+}
+
+function moveBall(pos: [number, number], direction: number,speed: number): [number, number] {
+    if(!direction){
+        return [pos[X], pos[Y] + speed];
+    } else{
+        return [pos[X], pos[Y] - speed];
+    }
+    
+}
+
+function getBallDirection(yPos: number, direction: number, paddleY: number): number {
+    if(yPos <= 0){
+        return 0;
+    } else if(yPos >= paddleY){
+        return 1;
+    } else{
+        return direction;
+    }
+}
+
 window.onload = () => {
     const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
     const canvasContext: CanvasRenderingContext2D | null = canvas.getContext('2d');
@@ -23,8 +68,8 @@ window.onload = () => {
         paddleSpeed: 5
     }
 
-
-    let ballPos: [number, number] = [0, 0];
+    let ballPos: [number, number] = [canvas.width/2 - gameRules.ballSize/2, canvas.height/4];
+    let ballDirection: number = 0;
     let paddlePos: [number, number] = [canvas.width/2 - gameRules.paddleDimensions[X]/2, canvas.height - canvas.height/4];
 
     let keyPressed: boolean = false;
@@ -46,33 +91,13 @@ window.onload = () => {
         keyPressed  = false;
         keyDirection = '';
     });
+
     setInterval(() => {
         paddlePos[X] = movePaddle(keyDirection, paddlePos, gameRules.paddleSpeed);
+
+        ballDirection = getBallDirection(ballPos[Y], ballDirection, canvas.height - canvas.height/4);
+        ballPos = moveBall(ballPos, ballDirection, gameRules.ballSpeed);
         drawEverything(canvasContext, gameRules, ballPos, paddlePos);
     }, 1000/fps);
-    
-
-
-
 }
 
-function drawEverything(
-        context: CanvasRenderingContext2D,
-        gameRules: gameRulesType,
-        ballPos: [number, number],
-        paddlePos: [number, number]
-    ) {
-    context.fillStyle = 'black';
-    context.fillRect(0, 0, context.canvas.width, context.canvas.height);
-    context.fillStyle = 'white';
-    context.fillRect(paddlePos[X], paddlePos[Y], gameRules.paddleDimensions[0], gameRules.paddleDimensions[1]);
-}
-
-
-function movePaddle(event: string, paddlePos: [number, number], speed: number) {
-    if (event === 'ArrowLeft') {
-        return paddlePos[X] - speed;
-    } else if (event === 'ArrowRight') {
-        return paddlePos[X] + speed;
-    } else return paddlePos[X];
-}
