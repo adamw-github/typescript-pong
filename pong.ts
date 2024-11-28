@@ -9,6 +9,27 @@ type gameRulesType = {
 const X = 0;
 const Y = 1;
 
+let keyPressed: boolean = false;
+let keyDirection: string = '';
+
+
+window.addEventListener('keydown', (event) => {
+    if(!keyPressed){
+        if (event.key === 'ArrowLeft'){
+            keyDirection = 'ArrowLeft';
+        } else if (event.key === 'ArrowRight'){
+            keyDirection = 'ArrowRight';
+        }
+        keyPressed = true;
+    }
+});
+
+window.addEventListener('keyup', (event) => {
+    keyPressed  = false;
+    keyDirection = '';
+    });
+
+
 function drawEverything(
     context: CanvasRenderingContext2D,
     gameRules: gameRulesType,
@@ -28,11 +49,11 @@ function drawEverything(
 }
 
 function movePaddle(event: string, paddlePos: [number, number], speed: number) {
-if (event === 'ArrowLeft') {
-    return paddlePos[X] - speed;
-} else if (event === 'ArrowRight') {
-    return paddlePos[X] + speed;
-} else return paddlePos[X];
+    if (event === 'ArrowLeft') {
+        return paddlePos[X] - speed;
+    } else if (event === 'ArrowRight') {
+        return paddlePos[X] + speed;
+    } else return paddlePos[X];
 }
 
 function moveBall(pos: [number, number], direction: number,speed: number): [number, number] {
@@ -58,7 +79,7 @@ window.onload = () => {
     const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
     const canvasContext: CanvasRenderingContext2D | null = canvas.getContext('2d');
     if (!canvasContext) {
-        return;
+        throw new Error('2d rendering not supported');
     }
 
     let gameRules:gameRulesType = {
@@ -72,25 +93,8 @@ window.onload = () => {
     let ballDirection: number = 0;
     let paddlePos: [number, number] = [canvas.width/2 - gameRules.paddleDimensions[X]/2, canvas.height - canvas.height/4];
 
-    let keyPressed: boolean = false;
-    let keyDirection: string = '';
     const fps: number = 10;
-
-    window.addEventListener('keydown', (event) => {
-        if(!keyPressed){
-            if (event.key === 'ArrowLeft'){
-                keyDirection = 'ArrowLeft';
-            } else if (event.key === 'ArrowRight'){
-                keyDirection = 'ArrowRight';
-            }
-            keyPressed = true;
-        }
-    });
-
-    window.addEventListener('keyup', (event) => {
-        keyPressed  = false;
-        keyDirection = '';
-    });
+    
 
     setInterval(() => {
         paddlePos[X] = movePaddle(keyDirection, paddlePos, gameRules.paddleSpeed);
